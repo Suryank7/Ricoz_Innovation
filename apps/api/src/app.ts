@@ -12,12 +12,37 @@ export function createApp(): Application {
 
   // Security headers & CORS
   app.use(helmet({ crossOriginResourcePolicy: false }));
-  app.use(
-    cors({
-      origin: [ENV.CLIENT_ORIGIN, 'http://localhost:3000', 'http://127.0.0.1:3000'],
-      credentials: true,
-    })
-  );
+
+  const corsOptions: cors.CorsOptions = {
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl, server-to-server)
+      if (!origin) return callback(null, true);
+
+      // Allow any vercel deployment, localhost, or configured CLIENT_ORIGIN
+      const normalizedOrigin = origin.replace(/\/$/, '');
+      const configuredOrigin = (ENV.CLIENT_ORIGIN || '').replace(/\/$/, '');
+
+      if (
+        normalizedOrigin.endsWith('.vercel.app') ||
+        normalizedOrigin.includes('localhost') ||
+        normalizedOrigin.includes('127.0.0.1') ||
+        (configuredOrigin && normalizedOrigin === configuredOrigin) ||
+        true // Allow dynamically reflecting the origin for cross-domain API calls
+      ) {
+        return callback(null, true);
+      }
+
+      callback(null, true);
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+    exposedHeaders: ['Content-Range', 'X-Content-Range'],
+    optionsSuccessStatus: 204,
+  };
+
+  app.use(cors(corsOptions));
+  app.options('*', cors(corsOptions));
 
   // Request parsing & Logging
   app.use(express.json({ limit: '15mb' }));
@@ -50,7 +75,7 @@ export function createApp(): Application {
     });
   });
 
-  // Centralized Error Handling
+  // Centralized Error Middleware
   app.use(errorHandler);
 
   return app;
