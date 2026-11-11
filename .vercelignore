@@ -1,0 +1,12 @@
+data
+data/**
+uploads
+uploads/**
+node_modules
+apps/api/dist
+apps/web/.next
+.next
+.git
+.env
+.env.local
+*.log
