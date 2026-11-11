@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: ricoz-backend-api
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install && npm run build --workspace=apps/api
+    startCommand: node apps/api/dist/server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: API_PREFIX
+        value: /api/v1
+      - key: CLIENT_ORIGIN
+        value: https://ricoz-platform.vercel.app
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: MONGODB_URI
+        sync: false # Set this in the Render dashboard with your MongoDB Atlas URI
