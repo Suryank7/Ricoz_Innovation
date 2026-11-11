@@ -17,9 +17,11 @@ import { hashPassword } from './utils/password';
 import { ROLES, GATE_TYPES } from './config/constants';
 import { LegalService } from './services/legal.service';
 
-export async function seedDatabase() {
+export async function seedDatabase(shouldConnect = true) {
   console.log('--- Starting Database Seeding ---');
-  await connectDatabase();
+  if (shouldConnect) {
+    await connectDatabase();
+  }
 
   // Clear existing collections
   await Promise.all([

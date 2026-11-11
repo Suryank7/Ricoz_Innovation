@@ -23,7 +23,7 @@ export class AuthController {
       res.cookie('token', result.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
@@ -58,5 +58,18 @@ export class AuthController {
       success: true,
       message: 'Logged out successfully',
     });
+  }
+
+  static async seed(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { seedDatabase } = await import('../seed');
+      await seedDatabase(false);
+      res.status(200).json({
+        success: true,
+        message: 'Database seeded successfully with demo users, Chai & Chutney Express brand, SOPs, gates, and deal room.',
+      });
+    } catch (err) {
+      next(err);
+    }
   }
 }
