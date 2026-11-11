@@ -10,10 +10,10 @@ if (!fs.existsSync(ENV.UPLOAD_DIR)) {
 }
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
+  destination: (req: any, file: any, cb: any) => {
     cb(null, ENV.UPLOAD_DIR);
   },
-  filename: (req, file, cb) => {
+  filename: (req: any, file: any, cb: any) => {
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
     const sanitizedExt = path.extname(file.originalname).toLowerCase();
     const baseName = path.basename(file.originalname, sanitizedExt).replace(/[^a-zA-Z0-9-_]/g, '_');
@@ -28,7 +28,7 @@ export const upload = multer({
   limits: {
     fileSize: ENV.MAX_FILE_SIZE_MB * 1024 * 1024,
   },
-  fileFilter: (req, file, cb) => {
+  fileFilter: (req: any, file: any, cb: any) => {
     const ext = path.extname(file.originalname).toLowerCase();
     if (!allowedExtensions.includes(ext)) {
       return cb(new AppError(`Disallowed file type. Permitted formats: ${allowedExtensions.join(', ')}`, 400));

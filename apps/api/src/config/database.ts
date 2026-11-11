@@ -7,17 +7,19 @@ export async function connectDatabase(): Promise<typeof mongoose> {
   try {
     console.log(`Connecting to MongoDB at: ${ENV.MONGODB_URI}...`);
     const conn = await mongoose.connect(ENV.MONGODB_URI, {
-      serverSelectionTimeoutMS: 3000,
-    });
+      serverSelectionTimeoutMS: 5000,
+    } as any);
     console.log('MongoDB successfully connected.');
     return conn;
   } catch (err: any) {
     console.warn(`Could not connect to external MongoDB: ${err.message}.`);
 
     if (ENV.NODE_ENV === 'development') {
-      console.log('Spinning up in-memory MongoDB server for seamless zero-config local development...');
+      console.log('Spinning up in-memory MongoDB server for development...');
       try {
-        const { MongoMemoryServer } = await import('mongodb-memory-server');
+        // Dynamic import to avoid missing declarations in production builds
+        const memPackage = 'mongodb-memory-server';
+        const { MongoMemoryServer } = (await import(memPackage)) as any;
         const mongod = await MongoMemoryServer.create();
         const uri = mongod.getUri();
         console.log(`In-memory MongoDB started at: ${uri}`);
